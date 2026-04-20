@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -44,5 +45,10 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(APIResponse.failure(List.of("A record with this information already exists."), "Data integrity violation"));
     }
-    
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<APIResponse<Void>> handleBadCredentialsException(BadCredentialsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(APIResponse.failure(List.of("Invalid credentials"), "Invalid Email or password"));
+    }
 }
