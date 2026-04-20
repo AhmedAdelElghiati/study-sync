@@ -2,7 +2,6 @@ package elghiati.studysync.service;
 
 import java.util.UUID;
 
-import elghiati.studysync.exception.DuplicateResourceException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +11,7 @@ import elghiati.studysync.dto.InstructorUpdateRequest;
 import elghiati.studysync.entity.Instructor;
 import elghiati.studysync.enums.ApprovalStatus;
 import elghiati.studysync.enums.Role;
+import elghiati.studysync.exception.DuplicateResourceException;
 import elghiati.studysync.exception.ResourceNotFoundException;
 import elghiati.studysync.repository.InstructorRepository;
 
@@ -33,7 +33,7 @@ public class InstructorService {
         return new InstructorResponse(
                 instructor.getId(),
                 instructor.getFullName(),
-                instructor.getUserName(),
+                instructor.getUsername(),
                 instructor.getUniversityEmail(),
                 instructor.getDepartment(),
                 instructor.getInstructorType(),
@@ -52,16 +52,18 @@ public class InstructorService {
         if (userService.findByUserName(request.userName()).isPresent()) {
             throw new DuplicateResourceException("Instructor with username: " + request.userName() + " already exists");
         }
-
+        if (userService.findByUniversityEmail(request.universityEmail()).isPresent()) {
+            throw new DuplicateResourceException("Instructor with university email: " + request.universityEmail() + " already exists");
+        }
         Instructor instructor = new Instructor();
         instructor.setFullName(request.fullName());
-        instructor.setUserName(request.userName());
+        instructor.setUsername(request.userName());
         instructor.setUniversityEmail(request.universityEmail());
         instructor.setDepartment(request.department());
         instructor.setRole(Role.INSTRUCTOR);
         instructor.setPasswordHash(passwordEncoder.encode(request.password()));
         instructor.setIdCardPath(request.idCardPath());
-        instructor.setApprovalStatus(ApprovalStatus.PENDING);
+        instructor.setApprovalStatus(ApprovalStatus.APPROVED);
         instructor.setInstructorType(request.instructorType());
 
         return mapToInstructorResponse(instructorRepository.save(instructor));
@@ -73,10 +75,10 @@ public class InstructorService {
 
     public InstructorResponse updateInstructor(UUID id, InstructorUpdateRequest request) {
         Instructor instructor = findOne(id);
-        if (userService.findByUserName(request.userName()).isPresent() && !instructor.getUserName().equals(request.userName())) {
+        if (userService.findByUserName(request.userName()).isPresent() && !instructor.getUsername().equals(request.userName())) {
             throw new DuplicateResourceException("Instructor with username: " + request.userName() + " already exists");
         }
-            instructor.setUserName(request.userName());
+            instructor.setUsername(request.userName());
             instructor.setDepartment(request.department());
             instructor.setIdCardPath(request.idCardPath());
             instructor.setInstructorType(request.instructorType());

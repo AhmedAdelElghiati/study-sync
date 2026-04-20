@@ -2,7 +2,6 @@ package elghiati.studysync.service;
 
 import java.util.UUID;
 
-import elghiati.studysync.exception.DuplicateResourceException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +11,7 @@ import elghiati.studysync.dto.StudentUpdateRequest;
 import elghiati.studysync.entity.Student;
 import elghiati.studysync.enums.ApprovalStatus;
 import elghiati.studysync.enums.Role;
+import elghiati.studysync.exception.DuplicateResourceException;
 import elghiati.studysync.exception.ResourceNotFoundException;
 import elghiati.studysync.repository.StudentRepository;
 
@@ -30,7 +30,7 @@ public class StudentService {
         return new StudentResponse(
                 student.getId(),
                 student.getFullName(),
-                student.getUserName(),
+                student.getUsername(),
                 student.getUniversityEmail(),
                 student.getDepartment(),
                 student.getLevel(),
@@ -50,15 +50,18 @@ public class StudentService {
         if (userService.findByUserName(request.userName()).isPresent()) {
             throw new DuplicateResourceException("Student with username: " + request.userName() + " already exists");
         }
+        if (userService.findByUniversityEmail(request.universityEmail()).isPresent()) {
+            throw new DuplicateResourceException("Student with university email: " + request.universityEmail() + " already exists");
+        }
         Student student = new Student();
         student.setFullName(request.fullName());
-        student.setUserName(request.userName());
+        student.setUsername(request.userName());
         student.setUniversityEmail(request.universityEmail());
         student.setDepartment(request.department());
         student.setRole(Role.STUDENT);
         student.setPasswordHash(passwordEncoder.encode(request.password()));
         student.setIdCardPath(request.idCardPath());
-        student.setApprovalStatus(ApprovalStatus.PENDING);
+        student.setApprovalStatus(ApprovalStatus.APPROVED);
         student.setLevel(request.level());
         student.setSeatNumber(request.seatNumber());
         return mapToStudentResponse(studentRepository.save(student));
@@ -72,10 +75,10 @@ public class StudentService {
 
     public StudentResponse updateStudent(UUID id, StudentUpdateRequest request) {
         Student student = findOne(id);
-        if (userService.findByUserName(request.userName()).isPresent() && !student.getUserName().equals(request.userName())) {
+        if (userService.findByUserName(request.userName()).isPresent() && !student.getUsername().equals(request.userName())) {
             throw new DuplicateResourceException("Student with username: " + request.userName() + " already exists");
         }
-        student.setUserName(request.userName());
+        student.setUsername(request.userName());
         student.setDepartment(request.department());
         student.setLevel(request.level());
         student.setGpa(request.gpa());

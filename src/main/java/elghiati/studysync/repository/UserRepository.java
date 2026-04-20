@@ -11,9 +11,11 @@ import elghiati.studysync.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM User u WHERE u.userName = :userName")
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM User u WHERE u.username = :userName")
     boolean existsByUserName(String userName);
-    @Query("SELECT u FROM User u WHERE u.userName = :userName")
+    @Query("SELECT u FROM User u WHERE u.username = :userName")
     Optional<User> findByUserName(String userName);
+    @Query("SELECT u FROM User u WHERE u.universityEmail = :universityEmail")
+    Optional<User> findByUniversityEmail(String universityEmail);
 
 }

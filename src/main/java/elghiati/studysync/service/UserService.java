@@ -20,6 +20,9 @@ public class UserService {
     public Optional<User> findByUserName(String userName) {
         return userRepository.findByUserName(userName);
     }
+    public Optional<User> findByUniversityEmail(String universityEmail) {
+        return userRepository.findByUniversityEmail(universityEmail);
+    }
 
 
 }
