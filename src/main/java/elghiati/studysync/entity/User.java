@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import elghiati.studysync.enums.InstructorType;
 import org.hibernate.annotations.UuidGenerator;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -75,6 +76,13 @@ public class User implements UserDetails {
         authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
         if(this instanceof Student student && student.isBatchRep()) {
             authorities.add(new SimpleGrantedAuthority("ROLE_BATCH_REP"));
+        }
+        if(this instanceof Instructor instructor) {
+            if(instructor.getInstructorType() == InstructorType.PROFESSOR) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_PROFESSOR"));
+            } else if(instructor.getInstructorType() == InstructorType.TEACHING_ASSISTANT) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_TEACHING_ASSISTANT"));
+            }
         }
         return authorities;
     }
