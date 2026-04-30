@@ -1,5 +1,6 @@
 package elghiati.studysync.service;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -88,5 +89,9 @@ public class InstructorService {
     public void deleteInstructor(UUID id) {
         Instructor instructor = findOne(id);
         instructorRepository.delete(instructor);
+    }
+
+    public Set<Instructor> getInstructorsByIds(Set<UUID> uuids) {
+        return instructorRepository.findInstructorsByIds(uuids);
     }
 }

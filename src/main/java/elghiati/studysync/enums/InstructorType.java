@@ -1,6 +1,6 @@
 package elghiati.studysync.enums;
 
 public enum InstructorType {
-    Professor,
-    TeachingAssistant
+    PROFESSOR,
+    TEACHING_ASSISTANT
 }
