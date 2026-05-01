@@ -1,7 +1,9 @@
 package elghiati.studysync.service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -93,5 +95,10 @@ public class InstructorService {
 
     public Set<Instructor> getInstructorsByIds(Set<UUID> uuids) {
         return instructorRepository.findInstructorsByIds(uuids);
+    }
+    public List<InstructorResponse> getAllInstructors() {
+        return instructorRepository.findAll().stream()
+                .map(this::mapToInstructorResponse)
+                .collect(Collectors.toList());
     }
 }

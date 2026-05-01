@@ -1,5 +1,6 @@
 package elghiati.studysync.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -40,6 +41,12 @@ public class InstructorController {
     public ResponseEntity<APIResponse<InstructorResponse>> getInstructorById(@PathVariable UUID id) {
         InstructorResponse instructorResponse = instructorService.getInstructorById(id);
         return ResponseEntity.ok(APIResponse.success(instructorResponse, "Instructor found successfully"));
+    }
+
+    @GetMapping
+    public ResponseEntity<APIResponse<List<InstructorResponse>>> getAllInstructors() {
+        List<InstructorResponse> instructorResponses = instructorService.getAllInstructors();
+        return ResponseEntity.ok(APIResponse.success(instructorResponses, "Instructors retrieved successfully"));
     }
 
     @PutMapping("/{id}")

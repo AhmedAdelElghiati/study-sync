@@ -7,6 +7,7 @@ import elghiati.studysync.entity.Instructor;
 import elghiati.studysync.entity.Student;
 import elghiati.studysync.entity.User;
 import elghiati.studysync.service.CourseService;
+import elghiati.studysync.service.EnrollmentService;
 import elghiati.studysync.shared.APIResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,10 @@ import static org.springframework.http.HttpStatus.OK;
 public class CourseController {
 
     private final CourseService courseService;
-    public CourseController(CourseService courseService) {
+    private final EnrollmentService enrollmentService;
+    public CourseController(CourseService courseService , EnrollmentService enrollmentService) {
         this.courseService = courseService;
+        this.enrollmentService = enrollmentService;
     }
     @PostMapping
     @PreAuthorize("hasRole('PROFESSOR')")
@@ -83,5 +86,18 @@ public class CourseController {
         List<CourseResponse> courseResponse = courseService.getCoursesForInstructor(instructor);
         return ResponseEntity.ok(APIResponse.success(courseResponse , "Courses retrieved successfully"));
     }
-
+    @GetMapping("/{courseId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<APIResponse<CourseResponse>> getCourse(
+            @PathVariable UUID courseId,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        if(currentUser instanceof Student student) {
+            enrollmentService.verifyEnrollment(student , courseId);
+        } else if(currentUser instanceof Instructor instructor) {
+            courseService.verifyInstructorCourse(instructor , courseId);
+        }
+        CourseResponse courseResponse = courseService.getCourseById(courseId);
+        return ResponseEntity.ok(APIResponse.success(courseResponse , "Course retrieved successfully"));
+    }
 }

@@ -50,6 +50,11 @@ public class CourseService {
         );
     }
 
+    public Course findById(UUID id) {
+        Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course with id: " + id + " not found"));
+        return course;
+    }
+
     public CourseResponse getCourseById(UUID courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course with id: " + courseId + " not found"));
@@ -124,5 +129,13 @@ public class CourseService {
         }
 
         courseRepository.delete(course);
+    }
+
+    public void verifyInstructorCourse(Instructor instructor , UUID courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course with id: " + courseId + " not found"));
+        if (!course.getProfessor().getId().equals(instructor.getId()) && !course.getTeachingAssistants().contains(instructor)) {
+            throw new AccessDeniedException("You can only access your own courses");
+        }
     }
 }
