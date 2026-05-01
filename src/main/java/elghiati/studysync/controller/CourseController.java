@@ -9,6 +9,7 @@ import elghiati.studysync.entity.User;
 import elghiati.studysync.service.CourseService;
 import elghiati.studysync.service.EnrollmentService;
 import elghiati.studysync.shared.APIResponse;
+import elghiati.studysync.util.CourseAccessValidator;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -27,9 +27,11 @@ public class CourseController {
 
     private final CourseService courseService;
     private final EnrollmentService enrollmentService;
-    public CourseController(CourseService courseService , EnrollmentService enrollmentService) {
+    private final CourseAccessValidator courseAccessValidator;
+    public CourseController(CourseService courseService , EnrollmentService enrollmentService , CourseAccessValidator courseAccessValidator) {
         this.courseService = courseService;
         this.enrollmentService = enrollmentService;
+        this.courseAccessValidator = courseAccessValidator;
     }
     @PostMapping
     @PreAuthorize("hasRole('PROFESSOR')")
@@ -92,11 +94,7 @@ public class CourseController {
             @PathVariable UUID courseId,
             @AuthenticationPrincipal User currentUser
     ) {
-        if(currentUser instanceof Student student) {
-            enrollmentService.verifyEnrollment(student , courseId);
-        } else if(currentUser instanceof Instructor instructor) {
-            courseService.verifyInstructorCourse(instructor , courseId);
-        }
+        courseAccessValidator.validateCourseAccess(currentUser , courseId);
         CourseResponse courseResponse = courseService.getCourseById(courseId);
         return ResponseEntity.ok(APIResponse.success(courseResponse , "Course retrieved successfully"));
     }

@@ -1,15 +1,5 @@
 package elghiati.studysync.service;
 
-import java.time.Instant;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import elghiati.studysync.dto.CourseResponse;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import elghiati.studysync.dto.EnrollmentResponse;
 import elghiati.studysync.entity.Course;
 import elghiati.studysync.entity.Enrollment;
@@ -18,6 +8,15 @@ import elghiati.studysync.enums.EnrollmentStatus;
 import elghiati.studysync.exception.BusinessRuleException;
 import elghiati.studysync.exception.DuplicateResourceException;
 import elghiati.studysync.repository.EnrollmentRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class EnrollmentService {
@@ -89,7 +88,7 @@ public class EnrollmentService {
     public void verifyEnrollment(Student student , UUID courseId) {
         Optional<Enrollment> enrollment = enrollmentRepository.findByStudentIdAndCourseId(student.getId(), courseId);
         if(enrollment.isEmpty() || enrollment.get().getStatus() != EnrollmentStatus.ACTIVE) {
-            throw new BusinessRuleException("Student is not enrolled in this course");
+            throw new AccessDeniedException("Student is not enrolled in this course");
         }
     }
 }
