@@ -89,7 +89,6 @@ public class CourseController {
         return ResponseEntity.ok(APIResponse.success(courseResponse , "Courses retrieved successfully"));
     }
     @GetMapping("/{courseId}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<APIResponse<CourseResponse>> getCourse(
             @PathVariable UUID courseId,
             @AuthenticationPrincipal User currentUser

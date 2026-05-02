@@ -85,7 +85,7 @@ public class CourseService {
     }
     @Transactional(readOnly = true)
     public List<CourseResponse> getCoursesForStudent(Student student) {
-        List<Course> courses = courseRepository.findCoursesForStudent(student.getLevel(), student.getDepartment());
+        List<Course> courses = courseRepository.findCoursesForStudent(student.getLevel(), student.getDepartment() , student.getId());
         return courses.stream().map(this::mapToCourseResponse).collect(Collectors.toList());
     }
 
