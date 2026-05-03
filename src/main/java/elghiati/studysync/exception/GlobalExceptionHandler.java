@@ -1,7 +1,6 @@
 package elghiati.studysync.exception;
 
-import java.util.List;
-
+import elghiati.studysync.shared.APIResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +10,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
-import elghiati.studysync.shared.APIResponse;
+import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -64,5 +64,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(APIResponse.failure(List.of("Invalid JSON request"), "Bad request"));
+    }
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<APIResponse<Void>> handleMaxUploadSizeExceededException() {
+        return ResponseEntity
+                .status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(APIResponse.failure(
+                        List.of("File size exceeds the maximum allowed size (10MB)."),
+                        "File upload failed"
+                ));
+    }
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<APIResponse<Void>> handleFileUploadException(FileUploadException ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(APIResponse.failure(List.of(ex.getMessage()), "File upload failed"));
     }
 }

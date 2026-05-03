@@ -19,26 +19,29 @@ Studysync is a Spring Boot 4.0.5 backend for managing students and instructors. 
 
 ```text
 src/main/java/elghiati/studysync/
-├── config/        # Security config and JWT filter
-├── controller/    # REST endpoints (auth, students, instructors)
-├── dto/           # Request/response records with Jakarta Validation
-├── entity/        # JPA entities and inheritance model
-├── enums/         # String-backed enums used by entities and DTOs
-├── exception/     # Custom exceptions and global handlers
-├── repository/    # Spring Data JPA repositories
-├── service/       # Business logic and JWT support
-├── shared/        # Shared API response helpers
-└── util/          # Utility helpers
+├── config/          # Security config and JWT filter
+├── controller/      # REST endpoints (auth, students, instructors, courses, enrollments, materials)
+├── dto/             # Request/response records with Jakarta Validation
+├── entity/          # JPA entities and inheritance model
+├── enums/           # String-backed enums used by entities and DTOs
+├── exception/       # Custom exceptions and global handlers
+├── repository/      # Spring Data JPA repositories
+├── service/         # Business logic and JWT support
+├── shared/          # Shared API response helpers
+└── util/            # Utility helpers
 ```
 
 ## Domain highlights
 
-- `User` uses a UUID primary key and `JOINED` inheritance strategy.
-- Enum fields are persisted as strings (`@Enumerated(EnumType.STRING)`).
+- `User` uses a UUID primary key and `JOINED` inheritance strategy with subtypes: `Student`, `Instructor`, `Professor`, and `BatchRepresentive`.
+- Enum fields are persisted as strings (`@Enumerated(EnumType.STRING)`): `Department`, `Role`, `Level`, `ApprovalStatus`, `Semester`, `EnrollmentStatus`, `MaterialType`, and `InstructorType`.
 - DTOs are record-based and validation-heavy.
 - `StudentResponse` and `InstructorResponse` include `approvalStatus` and `createdAt`.
 - `StudentCreateRequest` and `InstructorCreateRequest` enforce university email (`@ics.tanta.edu.eg`) and password complexity rules.
 - `InstructorType` uses mixed-case enum constants: `Professor`, `TeachingAssistant`.
+- `Course` entities link to an instructor and department, with semester and level tracking.
+- `Enrollment` tracks student participation in courses with status transitions.
+- `CourseMaterial` classifies learning resources by type and associates with courses.
 
 ## API summary
 
@@ -65,6 +68,36 @@ Returns `AuthResponse` with `token`, `role`, and `userId`.
 - `GET /api/instructors/{id}`
 - `PUT /api/instructors/{id}`
 - `DELETE /api/instructors/{id}`
+
+### Courses (`/api/courses`)
+
+- `POST /api/courses`
+- `GET /api/courses`
+- `GET /api/courses/{id}`
+- `PUT /api/courses/{id}`
+- `DELETE /api/courses/{id}`
+
+Course entities support department, semester, and instructor assignment.
+
+### Enrollments (`/api/enrollments`)
+
+- `POST /api/enrollments`
+- `GET /api/enrollments`
+- `GET /api/enrollments/{id}`
+- `PUT /api/enrollments/{id}`
+- `DELETE /api/enrollments/{id}`
+
+Tracks student enrollment in courses with status (ENROLLED, COMPLETED, DROPPED).
+
+### Course Materials (`/api/course-materials`)
+
+- `POST /api/course-materials`
+- `GET /api/course-materials`
+- `GET /api/course-materials/{id}`
+- `PUT /api/course-materials/{id}`
+- `DELETE /api/course-materials/{id}`
+
+Manages course materials (lectures, assignments, etc.) with type classification.
 
 ## Security behavior
 
@@ -148,8 +181,33 @@ export SECRET_KEY="your-very-long-random-secret"
 
 If compilation fails with a Java release/version mismatch, make sure your build is using JDK 25.
 
+## Docker deployment
+
+A `Dockerfile` is provided for containerization. Build and run the application in Docker:
+
+```bash
+docker build -t studysync:latest .
+docker run -p 8080:8080 \
+  -e DB_USERNAME=your-username \
+  -e DB_PASSWORD=your-password \
+  -e SECRET_KEY=your-very-long-random-secret \
+  studysync:latest
+```
+
 ## Current test coverage
 
 The test suite currently contains one Spring context-load test:
 
 - `src/test/java/elghiati/studysync/StudysyncApplicationTests.java`
+
+## Development guidelines
+
+When adding new features, follow these conventions:
+
+1. **Primary Keys**: Use UUID for all persisted entities (extends from `User`).
+2. **Enums**: Always use `@Enumerated(EnumType.STRING)` to persist enums as strings, not ordinals.
+3. **DTOs**: Create separate request/response record classes with Jakarta Validation annotations. Keep them independent from entity classes.
+4. **Inheritance**: The user model uses JPA `JOINED` strategy; maintain this pattern for polymorphic queries.
+5. **Email validation**: University-affiliated users (students, instructors) must use `@ics.tanta.edu.eg` domain.
+6. **Build tool**: Always use the Maven Wrapper (`./mvnw` / `mvnw.cmd`) instead of a system Maven installation.
+7. **Java version**: Target Java 25; ensure your JDK toolchain matches.
