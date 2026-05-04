@@ -90,7 +90,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:4200",
-                "https://study-sync-two-psi.vercel.app"
+                "https://study-sync-two-psi.vercel.app",
+            "https://professor-dashboard--ahmedadelelghia.replit.app"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
