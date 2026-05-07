@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 public record TaskUpdateRequest(
@@ -14,6 +15,9 @@ public record TaskUpdateRequest(
 
         @Size(max = 5000, message = "Description must not exceed 5000 characters")
         String description,
+
+        @NotNull(message = "Max grade is required")
+        BigDecimal maxGrade,
 
         @NotNull(message = "Deadline is required")
         @Future(message = "Deadline must be in the future")

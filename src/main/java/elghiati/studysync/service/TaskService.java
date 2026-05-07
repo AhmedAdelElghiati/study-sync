@@ -1,5 +1,12 @@
 package elghiati.studysync.service;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import elghiati.studysync.dto.TaskCreateRequest;
 import elghiati.studysync.dto.TaskResponse;
 import elghiati.studysync.dto.TaskUpdateRequest;
@@ -11,12 +18,6 @@ import elghiati.studysync.exception.BusinessRuleException;
 import elghiati.studysync.exception.ResourceNotFoundException;
 import elghiati.studysync.repository.TaskRepository;
 import elghiati.studysync.util.CourseAccessValidator;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class TaskService {
@@ -41,9 +42,14 @@ public class TaskService {
                 task.getDescription(),
                 task.getCourse().getName(),
                 task.getAssignedBy().getFullName(),
+                task.getMaxGrade(),
                 task.getCreatedAt(),
                 task.getDeadline()
         );
+    }
+    public Task getTaskById(UUID taskId) {
+        return taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task with id " + taskId + " not found"));
     }
     @Transactional(readOnly = true)
     public List<TaskResponse> getTasksByCourseId(UUID courseId , User currentUser) {
@@ -61,6 +67,7 @@ public class TaskService {
         task.setTitle(request.title());
         task.setDescription(request.description());
         task.setCourse(course);
+        task.setMaxGrade(request.maxGrade());
         task.setAssignedBy(currentUser);
         task.setDeadline(request.deadline());
         return mapToTaskResponse(taskRepository.save(task));
@@ -80,6 +87,7 @@ public class TaskService {
             throw new BusinessRuleException("You can only update tasks you assigned");
         }
         task.setTitle(request.title());
+        task.setMaxGrade(request.maxGrade());
         task.setDescription(request.description());
         task.setDeadline(request.deadline());
         return mapToTaskResponse(taskRepository.save(task));

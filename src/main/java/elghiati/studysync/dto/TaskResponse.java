@@ -1,5 +1,6 @@
 package elghiati.studysync.dto;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -9,6 +10,7 @@ public record TaskResponse(
         String description,
         String courseName,
         String assignedBy,
+        BigDecimal maxGrade,
         Instant createdAt,
         Instant deadline
 ) {

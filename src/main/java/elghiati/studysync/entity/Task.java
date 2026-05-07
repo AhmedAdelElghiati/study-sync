@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -34,6 +35,9 @@ public class Task {
     @ManyToOne( fetch= FetchType.LAZY ,optional = false)
     @JoinColumn(name = "assigned_by_id", nullable = false)
     private User assignedBy;
+
+    @Column(name = "max_grade" , nullable = false)
+    private BigDecimal maxGrade;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
