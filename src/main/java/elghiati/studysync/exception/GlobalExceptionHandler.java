@@ -80,4 +80,10 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(APIResponse.failure(List.of(ex.getMessage()), "File upload failed"));
     }
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<APIResponse<Void>> handleBusinessRuleException(BusinessRuleException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(APIResponse.failure(List.of(ex.getMessage()), "Business rule violation"));
+    }
 }
