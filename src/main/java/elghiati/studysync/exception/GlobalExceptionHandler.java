@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.List;
+import java.util.Locale;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -45,7 +46,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<APIResponse<Void>> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(APIResponse.failure(List.of("A record with this information already exists."), "Data integrity violation"));
+                .body(APIResponse.failure(List.of(resolveDataIntegrityViolationException(ex)), "Data integrity violation"));
     }
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<APIResponse<Void>> handleBadCredentialsException(BadCredentialsException ex) {
@@ -85,5 +86,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(APIResponse.failure(List.of(ex.getMessage()), "Business rule violation"));
+    }
+    private String resolveDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        String message = getRootCauseMessage(ex).toLowerCase(Locale.ROOT);
+
+        if (message.contains("duplicate") || message.contains("unique")) {
+            return "A record with this information already exists.";
+        }
+        if (message.contains("foreign key")) {
+            return "The requested operation references a resource that does not exist or is still in use.";
+        }
+        if (message.contains("null value") || message.contains("not-null")) {
+            return "Required data is missing";
+        }
+        return "The request violates a data integrity constraint.";
+    }
+    private String getRootCauseMessage(DataIntegrityViolationException ex) {
+        Throwable root = ex;
+        while (root.getCause() != null) {
+            root = root.getCause();
+        }
+        return root.getMessage() == null ? "" : root.getMessage();
     }
 }

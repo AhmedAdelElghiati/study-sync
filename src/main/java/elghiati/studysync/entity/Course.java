@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UuidGenerator;
 
 import elghiati.studysync.enums.Department;
@@ -31,6 +33,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "courses")
+@SQLDelete(sql = "UPDATE courses SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -67,6 +71,9 @@ public class Course {
             inverseJoinColumns = @JoinColumn(name = "instructor_id")
     )
     private Set<Instructor> teachingAssistants = new HashSet<>();
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     @Column(name = "created_at", updatable = false , nullable = false)
     private Instant createdAt;
