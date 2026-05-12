@@ -2,7 +2,7 @@
 
 ### Brief
 
-Studysync is a university learning-management backend API built with Spring Boot. It currently provides JWT-secured flows for authentication, user management, courses, enrollments, tasks, and course materials (including file uploads).
+Studysync is a university learning-management backend API built with Spring Boot. It currently provides JWT-secured flows for authentication, user management, courses, enrollments, tasks, course materials (including file uploads), and announcements.
 
 ## Overview
 
@@ -54,7 +54,7 @@ src/main/java/elghiati/studysync/
 - Registration DTOs enforce university email rules (`@ics.tanta.edu.eg`) and password complexity.
 - `Course` tracks department, semester, level, and instructor ownership.
 - `Enrollment` tracks student-course membership and enrollment status.
-- `Task` and `CourseMaterial` are course-scoped resources with access checks.
+- `Task`, `CourseMaterial`, and `Announcement` are course-scoped resources with access checks.
 
 ## API summary
 
@@ -109,6 +109,17 @@ All successful responses are wrapped in `APIResponse<T>`.
 - `PUT /api/courses/{courseId}/tasks/{taskId}`
 - `DELETE /api/courses/{courseId}/tasks/{taskId}`
 - `GET /api/courses/{courseId}/tasks`
+
+### Announcements (`/api/announcements` & `/api/courses/{courseId}/announcements`)
+
+- `GET /api/announcements/unread` (student view)
+- `GET /api/announcements/read` (student view)
+- `GET /api/announcements/me` (creator view)
+- `GET /api/announcements/stats` (student view)
+- `PUT /api/announcements/{announcementId}/mark-as-read`
+- `POST /api/courses/{courseId}/announcements`
+- `PUT /api/courses/{courseId}/announcements/{announcementId}`
+- `DELETE /api/courses/{courseId}/announcements/{announcementId}`
 
 ## Security behavior
 
