@@ -1,23 +1,19 @@
 package elghiati.studysync.service;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import elghiati.studysync.dto.TaskCreateRequest;
 import elghiati.studysync.dto.TaskResponse;
 import elghiati.studysync.dto.TaskUpdateRequest;
-import elghiati.studysync.entity.Course;
-import elghiati.studysync.entity.Instructor;
-import elghiati.studysync.entity.Task;
-import elghiati.studysync.entity.User;
+import elghiati.studysync.entity.*;
 import elghiati.studysync.exception.BusinessRuleException;
 import elghiati.studysync.exception.ResourceNotFoundException;
 import elghiati.studysync.repository.TaskRepository;
 import elghiati.studysync.util.CourseAccessValidator;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TaskService {
@@ -55,6 +51,13 @@ public class TaskService {
     public List<TaskResponse> getTasksByCourseId(UUID courseId , User currentUser) {
         courseAccessValidator.validateCourseAccess(currentUser , courseId);
         return taskRepository.findByCourseId(courseId).stream()
+                .map(this::mapToTaskResponse)
+                .toList();
+    }
+    @Transactional(readOnly = true)
+    public List<TaskResponse> getUnsubmittedTasksByCourseAndStudent(UUID courseId , Student student) {
+        courseAccessValidator.validateCourseAccess(student , courseId);
+        return taskRepository.findUnsubmittedTasksByCourseAndStudent(courseId , student.getId()).stream()
                 .map(this::mapToTaskResponse)
                 .toList();
     }

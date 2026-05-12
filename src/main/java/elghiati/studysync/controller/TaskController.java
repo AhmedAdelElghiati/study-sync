@@ -4,6 +4,7 @@ import elghiati.studysync.dto.TaskCreateRequest;
 import elghiati.studysync.dto.TaskResponse;
 import elghiati.studysync.dto.TaskUpdateRequest;
 import elghiati.studysync.entity.Instructor;
+import elghiati.studysync.entity.Student;
 import elghiati.studysync.entity.User;
 import elghiati.studysync.service.TaskService;
 import elghiati.studysync.shared.APIResponse;
@@ -68,6 +69,17 @@ public class TaskController {
             @AuthenticationPrincipal User currentUser
     ) {
         List<TaskResponse> response = taskService.getTasksByCourseId(courseId, currentUser);
+        return ResponseEntity.ok(APIResponse.success(response, "Tasks retrieved successfully"));
+    }
+
+    @GetMapping("/unsubmitted")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<APIResponse<List<TaskResponse>>> getUnsubmittedTasksByCourseAndStudent(
+            @PathVariable UUID courseId,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        Student student = (Student) currentUser;
+        List<TaskResponse> response = taskService.getUnsubmittedTasksByCourseAndStudent(courseId, student);
         return ResponseEntity.ok(APIResponse.success(response, "Tasks retrieved successfully"));
     }
 }
