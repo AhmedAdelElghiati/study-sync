@@ -2,6 +2,7 @@ package elghiati.studysync.service;
 
 import elghiati.studysync.dto.TaskCreateRequest;
 import elghiati.studysync.dto.TaskResponse;
+import elghiati.studysync.dto.TaskStatsResponse;
 import elghiati.studysync.dto.TaskUpdateRequest;
 import elghiati.studysync.entity.*;
 import elghiati.studysync.exception.BusinessRuleException;
@@ -61,6 +62,23 @@ public class TaskService {
                 .map(this::mapToTaskResponse)
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<TaskResponse> getUnsubmittedTasksByStudent(Student student) {
+        return taskRepository.findUnsubmittedTasksByStudent(student.getId()).stream()
+                .map(this::mapToTaskResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public TaskStatsResponse getTaskStatsForStudent(Student student) {
+        long unsubmittedTasks = taskRepository.countUnsubmittedTasksByStudent(student.getId());
+        long submittedTasks = taskRepository.countSubmittedTasksByStudent(student.getId());
+        long totalTasks = unsubmittedTasks + submittedTasks;
+        return new TaskStatsResponse(unsubmittedTasks, submittedTasks , totalTasks);
+    }
+
+
     @Transactional
     public TaskResponse createTask(TaskCreateRequest request, Instructor currentUser , UUID courseId) {
         courseAccessValidator.validateCourseAccess(currentUser , courseId);

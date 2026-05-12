@@ -16,14 +16,66 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
 
     @Query("""
     SELECT t FROM Task t
-    JOIN FETCH t.course
+    JOIN FETCH t.course c
     JOIN FETCH t.assignedBy
-    WHERE t.course.id = :courseId 
-    AND NOT EXISTS 
-        (SELECT s FROM Submission s 
-         WHERE s.task = t 
-         AND s.student.id = :studentId
-          )
+    WHERE c.id = :courseId 
+    AND EXISTS (
+        SELECT e FROM Enrollment e 
+        WHERE e.student.id = :studentId 
+        AND e.course.id = c.id
+    )
+    AND NOT EXISTS (
+        SELECT s FROM Submission s 
+        WHERE s.task = t 
+        AND s.student.id = :studentId
+        )
     """)
     List<Task> findUnsubmittedTasksByCourseAndStudent(@Param("courseId") UUID courseId, @Param("studentId") UUID studentId);
+
+    @Query("""
+    SELECT t FROM Task t
+    JOIN FETCH t.course c
+    JOIN FETCH t.assignedBy
+    WHERE EXISTS (
+        SELECT e FROM Enrollment e 
+        WHERE e.student.id = :studentId 
+        AND e.course.id = c.id
+    )
+    AND NOT EXISTS (
+        SELECT s FROM Submission s 
+        WHERE s.task = t 
+        AND s.student.id = :studentId
+    )
+    """)
+    List<Task> findUnsubmittedTasksByStudent(@Param("studentId") UUID studentId);
+
+    @Query("""
+    SELECT COUNT(t) FROM Task t
+    WHERE EXISTS (
+        SELECT e FROM Enrollment e 
+        WHERE e.student.id = :studentId 
+        AND e.course.id = t.course.id
+    )
+    AND NOT EXISTS (
+        SELECT s FROM Submission s 
+        WHERE s.task = t 
+        AND s.student.id = :studentId
+    )
+    """)
+    long countUnsubmittedTasksByStudent(@Param("studentId") UUID studentId);
+
+    @Query("""
+    SELECT COUNT(t) FROM Task t
+    WHERE EXISTS (
+        SELECT e FROM Enrollment e 
+        WHERE e.student.id = :studentId 
+        AND e.course.id = t.course.id
+    )
+    AND EXISTS (
+        SELECT s FROM Submission s 
+        WHERE s.task = t 
+        AND s.student.id = :studentId
+    )
+    """)
+    long countSubmittedTasksByStudent(@Param("studentId") UUID studentId);
 }
