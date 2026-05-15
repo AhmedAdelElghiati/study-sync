@@ -2,7 +2,7 @@
 
 ### Brief
 
-Studysync is a university learning-management backend API built with Spring Boot. It currently provides JWT-secured flows for authentication, user management, courses, enrollments, tasks, course materials (including file uploads), and announcements.
+Studysync is a university learning-management backend API built with Spring Boot. It currently provides JWT-secured flows for authentication, user management, courses, enrollments, tasks, course materials (including file uploads), announcements, polls, and submissions.
 
 ## Overview
 
@@ -47,14 +47,15 @@ src/main/java/elghiati/studysync/
 ## Domain highlights
 
 - `User` uses UUID primary key and JPA `JOINED` inheritance.
-- Current concrete user entities include `Student` and `Instructor`.
+- Current concrete user entities include `Student`, `Instructor`, `Professor`, and `BatchRepresentitve`.
 - The project also contains role/type enums and follows string-backed enum persistence via `@Enumerated(EnumType.STRING)`.
 - `InstructorType` intentionally uses mixed-case constants: `Professor`, `TeachingAssistant`.
 - DTOs are record-based and validation-focused.
 - Registration DTOs enforce university email rules (`@ics.tanta.edu.eg`) and password complexity.
 - `Course` tracks department, semester, level, and instructor ownership.
 - `Enrollment` tracks student-course membership and enrollment status.
-- `Task`, `CourseMaterial`, and `Announcement` are course-scoped resources with access checks.
+- `Task`, `CourseMaterial`, `Announcement`, and `Poll` are course-scoped resources with access checks.
+- Task max grade is available in `Task` entity.
 
 ## API summary
 
@@ -103,12 +104,24 @@ All successful responses are wrapped in `APIResponse<T>`.
 - `DELETE /api/courses/{courseId}/materials/{materialId}`
 - `GET /api/courses/{courseId}/materials`
 
-### Tasks (`/api/courses/{courseId}/tasks`)
+### Tasks (`/api/courses/{courseId}/tasks` & `/api/tasks`)
 
 - `POST /api/courses/{courseId}/tasks`
 - `PUT /api/courses/{courseId}/tasks/{taskId}`
 - `DELETE /api/courses/{courseId}/tasks/{taskId}`
 - `GET /api/courses/{courseId}/tasks`
+- `GET /api/tasks` (global student dashboard)
+- `GET /api/tasks/unsubmitted` (global student view)
+- `GET /api/tasks/stats` (global student task stats)
+
+### Submissions (`/api/courses/{courseId}`)
+
+- `GET /api/courses/{courseId}/my-submissions` (student view)
+- `POST /api/courses/{courseId}/tasks/{taskId}/submit` (multipart upload)
+- `DELETE /api/courses/{courseId}/submissions/{submissionId}` (student view)
+- `PUT /api/courses/{courseId}/submissions/{submissionId}` (instructor grading)
+- `GET /api/courses/{courseId}/tasks/{taskId}/submissions` (instructor view)
+- `GET /api/courses/{courseId}/students/{studentId}/submissions` (instructor view)
 
 ### Announcements (`/api/announcements` & `/api/courses/{courseId}/announcements`)
 
@@ -120,6 +133,15 @@ All successful responses are wrapped in `APIResponse<T>`.
 - `POST /api/courses/{courseId}/announcements`
 - `PUT /api/courses/{courseId}/announcements/{announcementId}`
 - `DELETE /api/courses/{courseId}/announcements/{announcementId}`
+
+### Polls (`/api/polls` & `/api/courses/{courseId}/polls`)
+
+- `GET /api/polls` (student view)
+- `GET /api/polls/latest` (student view)
+- `POST /api/polls/{pollId}/vote` (student voting)
+- `GET /api/courses/{courseId}/polls` (instructor/rep view)
+- `POST /api/courses/{courseId}/polls` (instructor/rep create)
+- `DELETE /api/courses/{courseId}/polls/{pollId}` (instructor/rep delete)
 
 ## Security behavior
 
